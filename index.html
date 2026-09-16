@@ -419,14 +419,8 @@
         }
 
         async function iniciarSesionDiscord() {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'discord',
-            });
-
-            if (error) {
-                console.error('Error al conectar con Discord:', error.message);
-                alert('No se pudo iniciar sesión con Discord: ' + error.message);
-            }
+            // URL de OAuth2 configurada con tus parámetros exactos
+            window.location.href = "https://discord.com/oauth2/authorize?client_id=1549872309668548728&response_type=code&redirect_uri=https%3A%2F%2Fruijfdxodsmzpdsvrlqa.supabase.co%2Fauth%2Fv1%2Fcallback&scope=identify+email";
         }
 
         async function registrarUsuario() {
