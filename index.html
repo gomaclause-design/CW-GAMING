@@ -19,6 +19,7 @@
             --discord-hover: #4752C4;
             --text-color: #f3f4f6;
             --text-muted: #9ca3af;
+            --danger-color: #ef4444;
         }
 
         * {
@@ -96,6 +97,21 @@
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 0 25px var(--purple-neon);
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid var(--danger-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.4);
         }
 
         /* Hero Section */
@@ -236,14 +252,14 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .input-group label {
             display: block;
             font-size: 14px;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .input-group input {
@@ -262,6 +278,31 @@
             box-shadow: 0 0 10px var(--purple-glow);
         }
 
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-register-action {
+            background: transparent;
+            color: var(--purple-neon);
+            border: 1px solid var(--purple-neon);
+            transition: background 0.2s;
+        }
+
+        .btn-register-action:hover {
+            background: rgba(168, 85, 247, 0.1);
+        }
+
         /* Botón de Discord */
         .btn-discord {
             background-color: var(--discord-color);
@@ -277,7 +318,7 @@
             justify-content: center;
             gap: 10px;
             transition: background-color 0.2s, transform 0.2s;
-            margin-top: 15px;
+            margin-top: 5px;
         }
 
         .btn-discord:hover {
@@ -339,7 +380,7 @@
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
-        <div class="nav-buttons">
+        <div class="nav-buttons" id="navAuthContainer">
             <button class="btn-login" onclick="toggleModal(true)">Iniciar Sesión</button>
         </div>
     </header>
@@ -384,7 +425,7 @@
                 Iniciar sesión con Discord
             </button>
 
-            <div class="divider">o registro con contraseña</div>
+            <div class="divider">o accede con tu cuenta</div>
 
             <div class="input-group">
                 <label>Gamertag o Usuario</label>
@@ -396,7 +437,10 @@
                 <input type="password" id="passwordInput" placeholder="••••••••">
             </div>
             
-            <button class="btn-login" style="width: 100%; padding: 12px;" onclick="registrarUsuario()">Registrar / Ingresar</button>
+            <div class="modal-actions">
+                <button class="btn-register-action" onclick="registrarUsuario()">Crear Cuenta</button>
+                <button class="btn-login" onclick="iniciarSesionWeb()">Iniciar Sesión</button>
+            </div>
         </div>
     </div>
 
@@ -407,7 +451,6 @@
 
     <!-- Script de conexión a Supabase -->
     <script>
-        // Configuración de Supabase
         const SUPABASE_URL = 'https://ruijfdxodsmzpdsvrlqa.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k7_6gggFV2igOl6kvIN5wA_jZvFB-5S';
 
@@ -419,40 +462,106 @@
         }
 
         async function iniciarSesionDiscord() {
-            // URL de OAuth2 configurada con tus parámetros exactos
             window.location.href = "https://discord.com/oauth2/authorize?client_id=1549872309668548728&response_type=code&redirect_uri=https%3A%2F%2Fruijfdxodsmzpdsvrlqa.supabase.co%2Fauth%2Fv1%2Fcallback&scope=identify+email";
         }
 
+        // Crear Cuenta (Verifica si ya existe)
         async function registrarUsuario() {
-            const username = document.getElementById('usernameInput').value;
-            const password = document.getElementById('passwordInput').value;
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
 
             if (!username || !password) {
                 alert('Por favor completa todos los campos (usuario y contraseña)');
                 return;
             }
 
-            // Insertar datos incluyendo la contraseña en la tabla 'usuarios'
-            const { data, error } = await supabaseClient
+            // Verificar si el usuario ya existe
+            const { data: existente, error: errBusqueda } = await supabaseClient
                 .from('usuarios')
-                .insert([
-                    { 
-                        username: username, 
-                        password: password, 
-                        discord_id: 'web_user' 
-                    }
-                ]);
+                .select('*')
+                .eq('username', username)
+                .maybeSingle();
+
+            if (existente) {
+                alert('⚠️ Este usuario ya está registrado. Por favor, inicia sesión.');
+                return;
+            }
+
+            // Si no existe, crearlo
+            const { error } = await supabaseClient
+                .from('usuarios')
+                .insert([{ username: username, password: password, discord_id: 'web_user' }]);
 
             if (error) {
-                console.error('Error al guardar:', error);
-                alert('Hubo un error al registrar el usuario: ' + error.message);
+                alert('Hubo un error al registrar: ' + error.message);
             } else {
-                alert('¡Cuenta creada y guardada con éxito en Supabase!');
-                toggleModal(false);
-                document.getElementById('usernameInput').value = '';
+                alert('¡Cuenta creada con éxito! Ya puedes iniciar sesión.');
                 document.getElementById('passwordInput').value = '';
             }
         }
+
+        // Iniciar Sesión con Usuario y Contraseña
+        async function iniciarSesionWeb() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+
+            if (!username || !password) {
+                alert('Por favor ingresa tu usuario y contraseña');
+                return;
+            }
+
+            const { data: usuario, error } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .maybeSingle();
+
+            if (error || !usuario) {
+                alert('❌ Usuario o contraseña incorrectos.');
+                return;
+            }
+
+            // Guardar en localStorage para mantener sesión web activa simulada
+            localStorage.setItem('cw_user', usuario.username);
+            alert(`¡Bienvenido de nuevo, ${usuario.username}!`);
+            toggleModal(false);
+            verificarSesionLocal();
+        }
+
+        // Verificar sesión al cargar
+        async function verificarSesionLocal() {
+            const navContainer = document.getElementById('navAuthContainer');
+            
+            // 1. Revisar sesión de Discord (Supabase Auth)
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                const nombreDiscord = session.user.user_metadata?.full_name || session.user.email;
+                navContainer.innerHTML = `
+                    <span style="color: var(--purple-neon); font-weight: 600;">Hola, ${nombreDiscord}</span>
+                    <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+                `;
+                return;
+            }
+
+            // 2. Revisar sesión de Usuario/Contraseña local
+            const userLocal = localStorage.getItem('cw_user');
+            if (userLocal) {
+                navContainer.innerHTML = `
+                    <span style="color: var(--purple-neon); font-weight: 600;">Hola, ${userLocal}</span>
+                    <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+                `;
+            }
+        }
+
+        async function cerrarSesion() {
+            await supabaseClient.auth.signOut();
+            localStorage.removeItem('cw_user');
+            location.reload();
+        }
+
+        // Ejecutar verificación al cargar la página
+        window.onload = verificarSesionLocal;
     </script>
 </body>
 </html>
