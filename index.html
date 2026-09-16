@@ -239,7 +239,6 @@
             gap: 10px;
         }
 
-        /* Cuadro de Ajuste Cuadrado para Avatares (Importante) */
         .search-result-item img, .profile-avatar-square img {
             width: 45px;
             height: 45px;
@@ -687,12 +686,17 @@
         <p>&copy; 2026 CW Gaming. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Script de conexión y lógica -->
+    <!-- Script de conexión y lógica corregida -->
     <script>
         const SUPABASE_URL = 'https://ruijfdxodsmzpdsvrlqa.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k7_6gggFV2igOl6kvIN5wA_jZvFB-5S';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Limpiar tokens duplicados en el hash de la URL de inmediato al cargar
+        if (window.location.hash && window.location.hash.includes('access_token')) {
+            window.history.replaceState(null, document.title, window.location.pathname);
+        }
 
         function toggleModal(show, viewProfile = false) {
             const modal = document.getElementById('loginModal');
@@ -763,7 +767,6 @@
             container.innerHTML = `
                 <div class="profile-card">
                     <h3>MI PERFIL GAMING</h3>
-                    <!-- Contenedor cuadrado con recorte automático object-fit: cover -->
                     <div class="profile-avatar-square">
                         ${avatar ? `<img src="${avatar}" id="previewAvatar" alt="Avatar">` : `<div style="font-size:32px;color:#fff;">${nombre.charAt(0).toUpperCase()}</div>`}
                     </div>
@@ -792,7 +795,6 @@
             `;
         }
 
-        // Función para importar y convertir la imagen localmente a Base64 para ajustarla al cuadrado
         function convertirImagenLocal(event) {
             const file = event.target.files[0];
             if (file) {
@@ -803,7 +805,6 @@
                     if (preview) {
                         preview.src = e.target.result;
                     } else {
-                        // Si no existía imagen previa, reemplazar contenedor
                         const container = document.querySelector('.profile-avatar-square');
                         container.innerHTML = `<img src="${e.target.result}" id="previewAvatar" alt="Avatar">`;
                     }
@@ -839,7 +840,7 @@
             await supabaseClient.auth.signInWithOAuth({
                 provider: 'discord',
                 options: {
-                    redirectTo: window.location.href.split('?')[0]
+                    redirectTo: window.location.href.split('#')[0]
                 }
             });
         }
@@ -903,9 +904,14 @@
             verificarSesionLocal();
         }
 
+        // Buscador corregido y protegido contra errores de red/tabla vacía
         async function buscarUsuarios() {
-            const query = document.getElementById('searchInput').value.trim();
+            const searchInput = document.getElementById('searchInput');
             const resultsContainer = document.getElementById('searchResults');
+            
+            if (!searchInput || !resultsContainer) return;
+
+            const query = searchInput.value.trim();
 
             if (query.length === 0) {
                 resultsContainer.style.display = 'none';
@@ -913,62 +919,70 @@
                 return;
             }
 
-            const { data: usuarios, error } = await supabaseClient
-                .from('usuarios')
-                .select('username, created_at, avatar_url, bio')
-                .ilike('username', `%${query}%`)
-                .limit(5);
+            try {
+                const { data: usuarios, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('username, created_at, avatar_url, bio')
+                    .ilike('username', `%${query}%`)
+                    .limit(5);
 
-            if (error || !usuarios || usuarios.length === 0) {
+                if (error || !usuarios || usuarios.length === 0) {
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.innerHTML = `<div class="search-result-item">No se encontraron jugadores</div>`;
+                    return;
+                }
+
                 resultsContainer.style.display = 'block';
-                resultsContainer.innerHTML = `<div class="search-result-item">No se encontraron jugadores</div>`;
-                return;
-            }
-
-            resultsContainer.style.display = 'block';
-            resultsContainer.innerHTML = usuarios.map(u => `
-                <div class="search-result-item">
-                    ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:45px;height:45px;border-radius:8px;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">${u.username.charAt(0).toUpperCase()}</div>`}
-                    <div>
-                        🎮 <span>${u.username}</span><br>
-                        <small style="color:#9ca3af;">${u.bio || 'Sin biografía'}</small>
+                resultsContainer.innerHTML = usuarios.map(u => `
+                    <div class="search-result-item">
+                        ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:45px;height:45px;border-radius:8px;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">${u.username.charAt(0).toUpperCase()}</div>`}
+                        <div>
+                            🎮 <span>${u.username}</span><br>
+                            <small style="color:#9ca3af;">${u.bio || 'Sin biografía'}</small>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (err) {
+                console.error("Error en búsqueda:", err);
+            }
         }
 
-        // Lógica del Sistema de Chat
         async function cargarMensajesChat() {
             const chatBox = document.getElementById('chatMessages');
-            
-            // Intentar leer de una tabla 'mensajes' si existe, de lo contrario mostrar bienvenida
-            const { data: mensajes, error } = await supabaseClient
-                .from('mensajes')
-                .select('*')
-                .order('created_at', { ascending: true })
-                .limit(30);
+            if (!chatBox) return;
 
-            if (error || !mensajes || mensajes.length === 0) {
-                chatBox.innerHTML = `
+            try {
+                const { data: mensajes, error } = await supabaseClient
+                    .from('mensajes')
+                    .select('*')
+                    .order('created_at', { ascending: true })
+                    .limit(30);
+
+                if (error || !mensajes || mensajes.length === 0) {
+                    chatBox.innerHTML = `
+                        <div class="chat-msg">
+                            <div class="author">Sistema CW</div>
+                            <div class="text">¡Bienvenidos al chat global de la comunidad! Escribe un mensaje para empezar a interactuar.</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                chatBox.innerHTML = mensajes.map(m => `
                     <div class="chat-msg">
-                        <div class="author">Sistema CW</div>
-                        <div class="text">¡Bienvenidos al chat global de la comunidad! Escribe un mensaje para empezar a interactuar.</div>
+                        <div class="author">${m.username}</div>
+                        <div class="text">${m.mensaje}</div>
                     </div>
-                `;
-                return;
+                `).join('');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (e) {
+                console.error("Error cargando chat:", e);
             }
-
-            chatBox.innerHTML = mensajes.map(m => `
-                <div class="chat-msg">
-                    <div class="author">${m.username}</div>
-                    <div class="text">${m.mensaje}</div>
-                </div>
-            `).join('');
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         async function enviarMensajeChat() {
             const input = document.getElementById('chatInput');
+            if (!input) return;
             const texto = input.value.trim();
             if (!texto) return;
 
@@ -983,21 +997,21 @@
                 usuarioActual = "Invitado_" + Math.floor(Math.random() * 1000);
             }
 
-            // Insertar en Supabase si la tabla 'mensajes' existe
             const { error } = await supabaseClient
                 .from('mensajes')
                 .insert([{ username: usuarioActual, mensaje: texto }]);
 
             if (error) {
-                // Modo simulación local si la tabla no está creada aún en Supabase
                 const chatBox = document.getElementById('chatMessages');
-                chatBox.innerHTML += `
-                    <div class="chat-msg">
-                        <div class="author">${usuarioActual}</div>
-                        <div class="text">${texto}</div>
-                    </div>
-                `;
-                chatBox.scrollTop = chatBox.scrollHeight;
+                if (chatBox) {
+                    chatBox.innerHTML += `
+                        <div class="chat-msg">
+                            <div class="author">${usuarioActual}</div>
+                            <div class="text">${texto}</div>
+                        </div>
+                    `;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
             } else {
                 cargarMensajesChat();
             }
@@ -1007,6 +1021,7 @@
 
         async function verificarSesionLocal() {
             const navContainer = document.getElementById('navAuthContainer');
+            if (!navContainer) return;
             
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
