@@ -220,7 +220,7 @@
             background: var(--bg-color);
             border-radius: 8px;
             padding: 15px;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             border: 1px solid rgba(168, 85, 247, 0.2);
             display: none;
@@ -230,10 +230,20 @@
         }
 
         .search-result-item {
-            padding: 8px 12px;
+            padding: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 14px;
             color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-result-item img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .search-result-item span {
@@ -306,10 +316,10 @@
         .modal {
             background-color: var(--card-bg);
             border: 1px solid var(--purple-neon);
-            padding: 40px;
+            padding: 35px;
             border-radius: 16px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             box-shadow: 0 0 30px var(--purple-glow);
             position: relative;
         }
@@ -323,28 +333,34 @@
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .input-group label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
-        .input-group input {
+        .input-group input, .input-group textarea {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: var(--bg-color);
             border: 1px solid rgba(168, 85, 247, 0.3);
             border-radius: 8px;
             color: #fff;
             outline: none;
+            font-size: 14px;
             transition: border-color 0.3s;
         }
 
-        .input-group input:focus {
+        .input-group textarea {
+            resize: none;
+            height: 60px;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
             border-color: var(--purple-neon);
             box-shadow: 0 0 10px var(--purple-glow);
         }
@@ -403,7 +419,7 @@
             text-align: center;
             color: var(--text-muted);
             font-size: 12px;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
         .divider::before, .divider::after {
@@ -440,35 +456,45 @@
             text-align: center;
         }
 
-        .profile-avatar {
-            width: 70px;
-            height: 70px;
+        .profile-avatar-container {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: var(--purple-primary);
-            margin: 0 auto 15px;
+            margin: 0 auto 12px;
+            border: 2px solid var(--purple-neon);
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            background: var(--purple-primary);
+            box-shadow: 0 0 15px var(--purple-glow);
+        }
+
+        .profile-avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar-text {
+            font-size: 32px;
             font-family: 'Rajdhani', sans-serif;
             color: #fff;
-            border: 2px solid var(--purple-neon);
-            box-shadow: 0 0 15px var(--purple-glow);
         }
 
         .profile-info {
             background: var(--bg-color);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: left;
             border: 1px solid rgba(168, 85, 247, 0.2);
         }
 
         .profile-info p {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .profile-info span {
@@ -543,11 +569,8 @@
             <div id="authFormsContainer">
                 <h3>ACCESO A CW GAMING</h3>
                 
-                <!-- Botón de Discord -->
                 <button class="btn-discord" onclick="iniciarSesionDiscord()">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                    </svg>
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
                     Iniciar sesión con Discord
                 </button>
 
@@ -576,7 +599,7 @@
         <p>&copy; 2026 CW Gaming. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Script de conexión a Supabase -->
+    <!-- Script de conexión y lógica -->
     <script>
         const SUPABASE_URL = 'https://ruijfdxodsmzpdsvrlqa.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k7_6gggFV2igOl6kvIN5wA_jZvFB-5S';
@@ -623,75 +646,129 @@
         }
 
         async function mostrarTarjetaPerfil(container) {
+            const userLocal = localStorage.getItem('cw_user');
             const { data: { session } } = await supabaseClient.auth.getSession();
-            let nombreUsuario = "Usuario";
-            let tipoAcceso = "Discord OAuth";
+
+            let nombre = "Usuario";
+            let avatar = "";
+            let bio = "¡Hola! Estoy jugando en CW Gaming.";
+            let tipo = "Cuenta Local";
 
             if (session) {
-                nombreUsuario = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.preferred_username || session.user.email;
-            } else {
-                nombreUsuario = localStorage.getItem('cw_user') || "Gamertag";
-                tipoAcceso = "Cuenta Local";
+                nombre = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.preferred_username || session.user.email;
+                avatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || "";
+                tipo = "Discord OAuth";
+            } else if (userLocal) {
+                const { data: usuarioBD } = await supabaseClient
+                    .from('usuarios')
+                    .select('*')
+                    .eq('username', userLocal)
+                    .maybeSingle();
+
+                if (usuarioBD) {
+                    nombre = usuarioBD.username;
+                    avatar = usuarioBD.avatar_url || "";
+                    bio = usuarioBD.bio || "Sin biografía aún.";
+                }
             }
 
             container.innerHTML = `
                 <div class="profile-card">
                     <h3>MI PERFIL GAMING</h3>
-                    <div class="profile-avatar">${nombreUsuario.charAt(0).toUpperCase()}</div>
-                    <div class="profile-info">
-                        <p>Gamertag: <span>${nombreUsuario}</span></p>
-                        <p>Tipo de Sesión: <span>${tipoAcceso}</span></p>
-                        <p>Estado: <span style="color: #4ade80;">En Línea</span></p>
+                    <div class="profile-avatar-container">
+                        ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<div class="profile-avatar-text">${nombre.charAt(0).toUpperCase()}</div>`}
                     </div>
-                    <button class="btn-login" style="width: 100%;" onclick="toggleModal(false)">Cerrar Ventana</button>
+                    <div class="profile-info">
+                        <p>Gamertag: <span>${nombre}</span></p>
+                        <p>Tipo: <span>${tipo}</span></p>
+                        <p>Bio: <span id="bioText">${bio}</span></p>
+                    </div>
+                    <div class="input-group">
+                        <label>Actualizar Foto (URL de imagen)</label>
+                        <input type="text" id="newAvatarUrl" placeholder="https://imgur.com/tu-foto.png" value="${avatar}">
+                    </div>
+                    <div class="input-group">
+                        <label>Biografía</label>
+                        <textarea id="newBioInput" placeholder="Escribe algo sobre ti...">${bio === "Sin biografía aún." ? "" : bio}</textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-register-action" onclick="guardarPerfil()">Guardar Cambios</button>
+                        <button class="btn-login" onclick="toggleModal(false)">Cerrar</button>
+                    </div>
                 </div>
             `;
         }
 
-        async function iniciarSesionDiscord() {
-            window.location.href = "https://discord.com/oauth2/authorize?client_id=1549872309668548728&response_type=code&redirect_uri=https%3A%2F%2Fruijfdxodsmzpdsvrlqa.supabase.co%2Fauth%2Fv1%2Fcallback&scope=identify+email";
+        async function guardarPerfil() {
+            const userLocal = localStorage.getItem('cw_user');
+            const nuevaAvatar = document.getElementById('newAvatarUrl').value.trim();
+            const nuevaBio = document.getElementById('newBioInput').value.trim();
+
+            if (!userLocal) {
+                alert('Las opciones de edición están disponibles para cuentas locales por ahora.');
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('usuarios')
+                .update({ avatar_url: nuevaAvatar, bio: nuevaBio })
+                .eq('username', userLocal);
+
+            if (error) {
+                alert('Error al guardar: ' + error.message);
+            } else {
+                alert('¡Perfil actualizado con éxito!');
+                toggleModal(false);
+            }
         }
 
-        // Crear Cuenta (Verifica si ya existe)
+        async function iniciarSesionDiscord() {
+            await supabaseClient.auth.signInWithOAuth({
+                provider: 'discord',
+                options: {
+                    redirectTo: window.location.href.split('?')[0]
+                }
+            });
+        }
+
         async function registrarUsuario() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
 
             if (!username || !password) {
-                alert('Por favor completa todos los campos (usuario y contraseña)');
+                alert('Por favor completa todos los campos');
                 return;
             }
 
-            const { data: existente, error: errBusqueda } = await supabaseClient
+            const { data: existente } = await supabaseClient
                 .from('usuarios')
                 .select('*')
                 .eq('username', username)
                 .maybeSingle();
 
             if (existente) {
-                alert('⚠️ Este usuario ya está registrado. Por favor, inicia sesión.');
+                alert('⚠️ Este usuario ya está registrado.');
                 return;
             }
 
             const { error } = await supabaseClient
                 .from('usuarios')
-                .insert([{ username: username, password: password, discord_id: 'web_user' }]);
+                .insert([{ username: username, password: password, discord_id: 'web_user', bio: 'Nuevo en CW Gaming' }]);
 
             if (error) {
-                alert('Hubo un error al registrar: ' + error.message);
+                alert('Error: ' + error.message);
             } else {
-                alert('¡Cuenta creada con éxito! Ya puedes iniciar sesión.');
+                alert('¡Cuenta creada con éxito!');
                 document.getElementById('passwordInput').value = '';
             }
         }
 
-        // Iniciar Sesión con Usuario y Contraseña
         async function iniciarSesionWeb() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
 
             if (!username || !password) {
-                alert('Por favor ingresa tu usuario y contraseña');
+                alert('Ingresa usuario y contraseña');
                 return;
             }
 
@@ -708,12 +785,11 @@
             }
 
             localStorage.setItem('cw_user', usuario.username);
-            alert(`¡Bienvenido de nuevo, ${usuario.username}!`);
+            alert(`¡Bienvenido, ${usuario.username}!`);
             toggleModal(false);
             verificarSesionLocal();
         }
 
-        // Buscador interactivo de jugadores
         async function buscarUsuarios() {
             const query = document.getElementById('searchInput').value.trim();
             const resultsContainer = document.getElementById('searchResults');
@@ -726,7 +802,7 @@
 
             const { data: usuarios, error } = await supabaseClient
                 .from('usuarios')
-                .select('username, created_at')
+                .select('username, created_at, avatar_url, bio')
                 .ilike('username', `%${query}%`)
                 .limit(5);
 
@@ -739,16 +815,19 @@
             resultsContainer.style.display = 'block';
             resultsContainer.innerHTML = usuarios.map(u => `
                 <div class="search-result-item">
-                    🎮 Jugador: <span>${u.username}</span> (Registrado: ${new Date(u.created_at).toLocaleDateString()})
+                    ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:35px;height:35px;border-radius:50%;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">${u.username.charAt(0).toUpperCase()}</div>`}
+                    <div>
+                        🎮 <span>${u.username}</span><br>
+                        <small style="color:#9ca3af;">${u.bio || 'Sin biografía'}</small>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // Verificar sesión al cargar
         async function verificarSesionLocal() {
             const navContainer = document.getElementById('navAuthContainer');
             
-            // 1. Revisar sesión de Discord (Supabase Auth) extrayendo el nombre correcto
+            // Capturar retorno de Discord si existe en Supabase Auth
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 const nombreDiscord = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.preferred_username || session.user.email;
@@ -760,7 +839,6 @@
                 return;
             }
 
-            // 2. Revisar sesión de Usuario/Contraseña local
             const userLocal = localStorage.getItem('cw_user');
             if (userLocal) {
                 navContainer.innerHTML = `
@@ -777,7 +855,6 @@
             location.reload();
         }
 
-        // Ejecutar verificación al cargar la página
         window.onload = verificarSesionLocal;
     </script>
 </body>
