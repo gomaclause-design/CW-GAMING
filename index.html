@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CW Gaming - Portal de Videojuegos</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #0b0710;
+            --card-bg: #140d1f;
+            --purple-primary: #8a2be2;
+            --purple-neon: #a855f7;
+            --purple-glow: rgba(168, 85, 247, 0.4);
+            --discord-color: #5865F2;
+            --discord-hover: #4752C4;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Header / Navbar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(11, 7, 16, 0.9);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-container h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 24px;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--purple-glow);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--purple-neon);
+            text-shadow: 0 0 8px var(--purple-glow);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--purple-primary), var(--purple-neon));
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--purple-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--purple-neon);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            background: radial-gradient(circle at center, rgba(138, 43, 226, 0.15) 0%, rgba(11, 7, 16, 1) 70%);
+            margin-top: 60px;
+        }
+
+        .hero h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .hero h2 span {
+            color: var(--purple-neon);
+            text-shadow: 0 0 20px var(--purple-glow);
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--purple-primary);
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(138, 43, 226, 0.2);
+            box-shadow: 0 0 15px var(--purple-glow);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            padding: 30px;
+            border-radius: 12px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--purple-neon);
+            box-shadow: 0 5px 20px var(--purple-glow);
+        }
+
+        .card h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: var(--purple-neon);
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 50px;
+        }
+
+        /* Modal Login */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            background-color: var(--card-bg);
+            border: 1px solid var(--purple-neon);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 30px var(--purple-glow);
+            position: relative;
+        }
+
+        .modal h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-color);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--purple-neon);
+            box-shadow: 0 0 10px var(--purple-glow);
+        }
+
+        /* Botón de Discord */
+        .btn-discord {
+            background-color: var(--discord-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background-color 0.2s, transform 0.2s;
+            margin-top: 15px;
+        }
+
+        .btn-discord:hover {
+            background-color: var(--discord-hover);
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin: 20px 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .divider::before {
+            margin-right: 10px;
+        }
+
+        .divider::after {
+            margin-left: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <h1>CW GAMING</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#servicios">Comunidad</a></li>
+                <li><a href="#torneos">Torneos</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+        <div class="nav-buttons">
+            <button class="btn-login" onclick="toggleModal(true)">Iniciar Sesión</button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <h2>El siguiente nivel de la <span>Era Gaming</span></h2>
+        <p>Plataforma centralizada de videojuegos, servidores y comunidad optimizada con estilo oscuro y competitivo.</p>
+        <div class="hero-buttons">
+            <button class="btn-login" onclick="toggleModal(true)">Unirse Ahora</button>
+            <button class="btn-outline">Ver Servidores</button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="servicios">
+        <div class="card">
+            <h3>COMUNIDAD ACTIVA</h3>
+            <p>Conéctate con otros jugadores, comparte estrategias y forma parte de clanes exclusivos dentro de la plataforma.</p>
+        </div>
+        <div class="card">
+            <h3>ALTO RENDIMIENTO</h3>
+            <p>Infraestructura diseñada para ofrecer baja latencia, estabilidad y la mejor experiencia visual en tus títulos favoritos.</p>
+        </div>
+        <div class="card">
+            <h3>TORNEOS Y EVENTOS</h3>
+            <p>Participa en retos competitivos semanales, demuestra tus habilidades y escala posiciones en el ranking general.</p>
+        </div>
+    </section>
+
+    <!-- Modal de Login -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <button class="close-modal" onclick="toggleModal(false)">&times;</button>
+            <h3>ACCESO A CW GAMING</h3>
+            
+            <!-- Botón de Discord -->
+            <button class="btn-discord" onclick="iniciarSesionDiscord()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                </svg>
+                Iniciar sesión con Discord
+            </button>
+
+            <div class="divider">o registro con contraseña</div>
+
+            <div class="input-group">
+                <label>Gamertag o Usuario</label>
+                <input type="text" id="usernameInput" placeholder="Ej. noobgamer_1996">
+            </div>
+
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="passwordInput" placeholder="••••••••">
+            </div>
+            
+            <button class="btn-login" style="width: 100%; padding: 12px;" onclick="registrarUsuario()">Registrar / Ingresar</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 CW Gaming. Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Script de conexión a Supabase -->
+    <script>
+        // Configuración de Supabase
+        const SUPABASE_URL = 'https://ruijfdxodsmzpdsvrlqa.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_k7_6gggFV2igOl6kvIN5wA_jZvFB-5S';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function toggleModal(show) {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = show ? 'flex' : 'none';
+        }
+
+        async function iniciarSesionDiscord() {
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'discord',
+            });
+
+            if (error) {
+                console.error('Error al conectar con Discord:', error.message);
+                alert('No se pudo iniciar sesión con Discord: ' + error.message);
+            }
+        }
+
+        async function registrarUsuario() {
+            const username = document.getElementById('usernameInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!username || !password) {
+                alert('Por favor completa todos los campos (usuario y contraseña)');
+                return;
+            }
+
+            // Insertar datos incluyendo la contraseña en la tabla 'usuarios'
+            const { data, error } = await supabaseClient
+                .from('usuarios')
+                .insert([
+                    { 
+                        username: username, 
+                        password: password, 
+                        discord_id: 'web_user' 
+                    }
+                ]);
+
+            if (error) {
+                console.error('Error al guardar:', error);
+                alert('Hubo un error al registrar el usuario: ' + error.message);
+            } else {
+                alert('¡Cuenta creada y guardada con éxito en Supabase!');
+                toggleModal(false);
+                document.getElementById('usernameInput').value = '';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
