@@ -239,16 +239,123 @@
             gap: 10px;
         }
 
-        .search-result-item img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
+        /* Cuadro de Ajuste Cuadrado para Avatares (Importante) */
+        .search-result-item img, .profile-avatar-square img {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--purple-neon);
+        }
+
+        .profile-avatar-square {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            border: 2px solid var(--purple-neon);
+            box-shadow: 0 0 15px var(--purple-glow);
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-avatar-square img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
-        .search-result-item span {
+        /* Sección de Chat en Vivo */
+        .chat-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 50px;
+        }
+
+        .chat-container {
+            background: var(--card-bg);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 20px var(--purple-glow);
+            display: flex;
+            flex-direction: column;
+            height: 450px;
+        }
+
+        .chat-header {
+            background: rgba(138, 43, 226, 0.2);
+            padding: 15px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            color: #fff;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--bg-color);
+        }
+
+        .chat-msg {
+            background: rgba(20, 13, 31, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .chat-msg .author {
             color: var(--purple-neon);
             font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .chat-msg .text {
+            color: var(--text-color);
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 15px;
+            background: var(--card-bg);
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            background: var(--bg-color);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--purple-neon);
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, var(--purple-primary), var(--purple-neon));
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         /* Features Section */
@@ -451,37 +558,6 @@
             color: #fff;
         }
 
-        /* Tarjeta de Perfil Interno */
-        .profile-card {
-            text-align: center;
-        }
-
-        .profile-avatar-container {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 12px;
-            border: 2px solid var(--purple-neon);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--purple-primary);
-            box-shadow: 0 0 15px var(--purple-glow);
-        }
-
-        .profile-avatar-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-avatar-text {
-            font-size: 32px;
-            font-family: 'Rajdhani', sans-serif;
-            color: #fff;
-        }
-
         .profile-info {
             background: var(--bg-color);
             padding: 12px;
@@ -514,8 +590,8 @@
             <ul>
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#servicios">Comunidad</a></li>
-                <li><a href="#torneos">Torneos</a></li>
-                <li><a href="#contacto">Contacto</a></li>
+                <li><a href="#chatGlobal">Chat</a></li>
+                <li><a href="#buscadorUsuarios">Buscar</a></li>
             </ul>
         </nav>
         <div class="nav-buttons" id="navAuthContainer">
@@ -540,8 +616,20 @@
             <div class="search-input-group">
                 <input type="text" id="searchInput" placeholder="Escribe un gamertag o usuario..." oninput="buscarUsuarios()">
             </div>
-            <div class="search-results" id="searchResults">
-                <!-- Resultados en tiempo real -->
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </section>
+
+    <!-- Sistema de Chateo Section -->
+    <section class="chat-section" id="chatGlobal">
+        <div class="chat-container">
+            <div class="chat-header">💬 CHAT GLOBAL DE LA COMUNIDAD</div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Mensajes dinámicos -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key === 'Enter') enviarMensajeChat()">
+                <button class="btn-send" onclick="enviarMensajeChat()">Enviar</button>
             </div>
         </div>
     </section>
@@ -675,8 +763,9 @@
             container.innerHTML = `
                 <div class="profile-card">
                     <h3>MI PERFIL GAMING</h3>
-                    <div class="profile-avatar-container">
-                        ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<div class="profile-avatar-text">${nombre.charAt(0).toUpperCase()}</div>`}
+                    <!-- Contenedor cuadrado con recorte automático object-fit: cover -->
+                    <div class="profile-avatar-square">
+                        ${avatar ? `<img src="${avatar}" id="previewAvatar" alt="Avatar">` : `<div style="font-size:32px;color:#fff;">${nombre.charAt(0).toUpperCase()}</div>`}
                     </div>
                     <div class="profile-info">
                         <p>Gamertag: <span>${nombre}</span></p>
@@ -684,8 +773,12 @@
                         <p>Bio: <span id="bioText">${bio}</span></p>
                     </div>
                     <div class="input-group">
-                        <label>Actualizar Foto (URL de imagen)</label>
-                        <input type="text" id="newAvatarUrl" placeholder="https://imgur.com/tu-foto.png" value="${avatar}">
+                        <label>Subir imagen desde el dispositivo</label>
+                        <input type="file" id="deviceImageInput" accept="image/*" onchange="convertirImagenLocal(event)">
+                    </div>
+                    <div class="input-group">
+                        <label>O URL de imagen</label>
+                        <input type="text" id="newAvatarUrl" placeholder="https://..." value="${avatar}">
                     </div>
                     <div class="input-group">
                         <label>Biografía</label>
@@ -697,6 +790,26 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Función para importar y convertir la imagen localmente a Base64 para ajustarla al cuadrado
+        function convertirImagenLocal(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('newAvatarUrl').value = e.target.result;
+                    const preview = document.getElementById('previewAvatar');
+                    if (preview) {
+                        preview.src = e.target.result;
+                    } else {
+                        // Si no existía imagen previa, reemplazar contenedor
+                        const container = document.querySelector('.profile-avatar-square');
+                        container.innerHTML = `<img src="${e.target.result}" id="previewAvatar" alt="Avatar">`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         async function guardarPerfil() {
@@ -815,7 +928,7 @@
             resultsContainer.style.display = 'block';
             resultsContainer.innerHTML = usuarios.map(u => `
                 <div class="search-result-item">
-                    ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:35px;height:35px;border-radius:50%;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">${u.username.charAt(0).toUpperCase()}</div>`}
+                    ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:45px;height:45px;border-radius:8px;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">${u.username.charAt(0).toUpperCase()}</div>`}
                     <div>
                         🎮 <span>${u.username}</span><br>
                         <small style="color:#9ca3af;">${u.bio || 'Sin biografía'}</small>
@@ -824,10 +937,77 @@
             `).join('');
         }
 
+        // Lógica del Sistema de Chat
+        async function cargarMensajesChat() {
+            const chatBox = document.getElementById('chatMessages');
+            
+            // Intentar leer de una tabla 'mensajes' si existe, de lo contrario mostrar bienvenida
+            const { data: mensajes, error } = await supabaseClient
+                .from('mensajes')
+                .select('*')
+                .order('created_at', { ascending: true })
+                .limit(30);
+
+            if (error || !mensajes || mensajes.length === 0) {
+                chatBox.innerHTML = `
+                    <div class="chat-msg">
+                        <div class="author">Sistema CW</div>
+                        <div class="text">¡Bienvenidos al chat global de la comunidad! Escribe un mensaje para empezar a interactuar.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            chatBox.innerHTML = mensajes.map(m => `
+                <div class="chat-msg">
+                    <div class="author">${m.username}</div>
+                    <div class="text">${m.mensaje}</div>
+                </div>
+            `).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function enviarMensajeChat() {
+            const input = document.getElementById('chatInput');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            let usuarioActual = localStorage.getItem('cw_user');
+            
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                usuarioActual = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email;
+            }
+
+            if (!usuarioActual) {
+                usuarioActual = "Invitado_" + Math.floor(Math.random() * 1000);
+            }
+
+            // Insertar en Supabase si la tabla 'mensajes' existe
+            const { error } = await supabaseClient
+                .from('mensajes')
+                .insert([{ username: usuarioActual, mensaje: texto }]);
+
+            if (error) {
+                // Modo simulación local si la tabla no está creada aún en Supabase
+                const chatBox = document.getElementById('chatMessages');
+                chatBox.innerHTML += `
+                    <div class="chat-msg">
+                        <div class="author">${usuarioActual}</div>
+                        <div class="text">${texto}</div>
+                    </div>
+                `;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                cargarMensajesChat();
+            }
+
+            input.value = '';
+        }
+
         async function verificarSesionLocal() {
             const navContainer = document.getElementById('navAuthContainer');
             
-            // Capturar retorno de Discord si existe en Supabase Auth
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 const nombreDiscord = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.preferred_username || session.user.email;
@@ -836,6 +1016,7 @@
                     <span style="color: var(--purple-neon); font-weight: 600;">Hola, ${nombreDiscord}</span>
                     <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
                 `;
+                cargarMensajesChat();
                 return;
             }
 
@@ -847,6 +1028,7 @@
                     <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
                 `;
             }
+            cargarMensajesChat();
         }
 
         async function cerrarSesion() {
