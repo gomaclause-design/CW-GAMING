@@ -845,6 +845,36 @@
             });
         }
 
+        // NUEVA FUNCIÓN: Registra o actualiza automáticamente al usuario de Discord en la tabla 'usuarios'
+        async function sincronizarUsuarioDiscord() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
+
+            const user = session.user;
+            const discordUsername = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email;
+            const discordAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+            const discordId = user.id;
+
+            // Verificar si ya existe en la tabla
+            const { data: existente } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .eq('discord_id', discordId)
+                .maybeSingle();
+
+            if (!existente) {
+                // Si no existe por discord_id, lo insertamos marcando que es de Discord
+                await supabaseClient
+                    .from('usuarios')
+                    .insert([{
+                        username: discordUsername,
+                        discord_id: discordId,
+                        avatar_url: discordAvatar,
+                        bio: 'Jugador verificado con Discord 🎮'
+                    }]);
+            }
+        }
+
         async function registrarUsuario() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
@@ -904,14 +934,14 @@
             verificarSesionLocal();
         }
 
-        // Buscador completamente operativo utilizando la columna bio
+        // Buscador directo en la base de datos (ahora incluye a los de Discord porque se guardan automáticamente)
         async function buscarUsuarios() {
             const searchInput = document.getElementById('searchInput');
             const resultsContainer = document.getElementById('searchResults');
             
             if (!searchInput || !resultsContainer) return;
 
-            const query = searchInput.value.trim();
+            const query = searchInput.value.trim().toLowerCase();
 
             if (query.length === 0) {
                 resultsContainer.style.display = 'none';
@@ -922,33 +952,30 @@
             try {
                 const { data: usuarios, error } = await supabaseClient
                     .from('usuarios')
-                    .select('username, created_at, avatar_url, bio')
+                    .select('username, created_at, avatar_url, bio, discord_id')
                     .ilike('username', `%${query}%`)
                     .limit(5);
 
-                if (error) {
-                    console.error("Error de Supabase en búsqueda:", error.message);
-                    resultsContainer.style.display = 'block';
-                    resultsContainer.innerHTML = `<div class="search-result-item">Error al buscar (revisa políticas RLS)</div>`;
-                    return;
-                }
-
-                if (!usuarios || usuarios.length === 0) {
+                if (error || !usuarios || usuarios.length === 0) {
                     resultsContainer.style.display = 'block';
                     resultsContainer.innerHTML = `<div class="search-result-item">No se encontraron jugadores</div>`;
                     return;
                 }
 
                 resultsContainer.style.display = 'block';
-                resultsContainer.innerHTML = usuarios.map(u => `
-                    <div class="search-result-item">
-                        ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:45px;height:45px;border-radius:8px;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">${u.username.charAt(0).toUpperCase()}</div>`}
-                        <div>
-                            🎮 <span>${u.username}</span><br>
-                            <small style="color:#9ca3af;">${u.bio || 'Sin biografía'}</small>
+                resultsContainer.innerHTML = usuarios.map(u => {
+                    const esDiscord = u.discord_id && u.discord_id !== 'web_user';
+                    return `
+                        <div class="search-result-item">
+                            ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:45px;height:45px;border-radius:8px;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">${u.username.charAt(0).toUpperCase()}</div>`}
+                            <div>
+                                🎮 <span>${u.username}</span> ${esDiscord ? '<span style="color:#5865F2; font-size:11px; margin-left:5px;">(Discord)</span>' : ''}<br>
+                                <small style="color:#9ca3af;">${u.bio || 'Sin biografía'}</small>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
+
             } catch (err) {
                 console.error("Error inesperado en búsqueda:", err);
             }
@@ -1027,6 +1054,9 @@
         }
 
         async function verificarSesionLocal() {
+            // Sincronizar automáticamente el usuario de Discord a la base de datos al cargar
+            await sincronizarUsuarioDiscord();
+
             const navContainer = document.getElementById('navAuthContainer');
             if (!navContainer) return;
             
@@ -1063,4 +1093,3 @@
     </script>
 </body>
 </html>
-```[cite: 4]
