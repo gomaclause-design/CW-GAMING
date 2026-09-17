@@ -686,7 +686,7 @@
         <p>&copy; 2026 CW Gaming. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Script de conexión y lógica corregida -->
+    <!-- Script de conexión y lógica -->
     <script>
         const SUPABASE_URL = 'https://ruijfdxodsmzpdsvrlqa.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_k7_6gggFV2igOl6kvIN5wA_jZvFB-5S';
@@ -753,7 +753,7 @@
             } else if (userLocal) {
                 const { data: usuarioBD } = await supabaseClient
                     .from('usuarios')
-                    .select('*')
+                    .select('username, avatar_url, bio')
                     .eq('username', userLocal)
                     .maybeSingle();
 
@@ -904,7 +904,7 @@
             verificarSesionLocal();
         }
 
-        // Buscador completamente corregido y optimizado
+        // Buscador completamente operativo utilizando la columna bio
         async function buscarUsuarios() {
             const searchInput = document.getElementById('searchInput');
             const resultsContainer = document.getElementById('searchResults');
