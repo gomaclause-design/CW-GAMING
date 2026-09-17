@@ -904,7 +904,7 @@
             verificarSesionLocal();
         }
 
-        // Buscador corregido y protegido contra errores de red/tabla vacía
+        // Buscador completamente corregido y optimizado
         async function buscarUsuarios() {
             const searchInput = document.getElementById('searchInput');
             const resultsContainer = document.getElementById('searchResults');
@@ -926,7 +926,14 @@
                     .ilike('username', `%${query}%`)
                     .limit(5);
 
-                if (error || !usuarios || usuarios.length === 0) {
+                if (error) {
+                    console.error("Error de Supabase en búsqueda:", error.message);
+                    resultsContainer.style.display = 'block';
+                    resultsContainer.innerHTML = `<div class="search-result-item">Error al buscar (revisa políticas RLS)</div>`;
+                    return;
+                }
+
+                if (!usuarios || usuarios.length === 0) {
                     resultsContainer.style.display = 'block';
                     resultsContainer.innerHTML = `<div class="search-result-item">No se encontraron jugadores</div>`;
                     return;
@@ -943,7 +950,7 @@
                     </div>
                 `).join('');
             } catch (err) {
-                console.error("Error en búsqueda:", err);
+                console.error("Error inesperado en búsqueda:", err);
             }
         }
 
