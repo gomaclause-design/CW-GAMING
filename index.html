@@ -845,26 +845,26 @@
             });
         }
 
-        // NUEVA FUNCIÓN: Registra o actualiza automáticamente al usuario de Discord en la tabla 'usuarios'
+        // FUNCIÓN CORREGIDA Y BLINDADA: Inserta o actualiza el usuario de Discord en la tabla de Supabase
         async function sincronizarUsuarioDiscord() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
             const user = session.user;
-            const discordUsername = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email;
+            const discordUsername = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.preferred_username || user.email.split('@')[0];
             const discordAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
             const discordId = user.id;
 
-            // Verificar si ya existe en la tabla
+            // Revisar si ya existe el registro por ID de Discord o por nombre de usuario
             const { data: existente } = await supabaseClient
                 .from('usuarios')
                 .select('*')
-                .eq('discord_id', discordId)
+                .or(`discord_id.eq.${discordId},username.eq.${discordUsername}`)
                 .maybeSingle();
 
             if (!existente) {
-                // Si no existe por discord_id, lo insertamos marcando que es de Discord
-                await supabaseClient
+                // Si no existe, se inserta con los datos correspondientes de Discord
+                const { error } = await supabaseClient
                     .from('usuarios')
                     .insert([{
                         username: discordUsername,
@@ -872,6 +872,16 @@
                         avatar_url: discordAvatar,
                         bio: 'Jugador verificado con Discord 🎮'
                     }]);
+                
+                if (error) {
+                    console.error("Error al registrar usuario de Discord automáticamente:", error.message);
+                }
+            } else if (!existente.discord_id || existente.discord_id === 'web_user') {
+                // Si ya existía de forma local, actualizamos su discord_id y avatar
+                await supabaseClient
+                    .from('usuarios')
+                    .update({ discord_id: discordId, avatar_url: discordAvatar })
+                    .eq('username', discordUsername);
             }
         }
 
@@ -934,7 +944,6 @@
             verificarSesionLocal();
         }
 
-        // Buscador directo en la base de datos (ahora incluye a los de Discord porque se guardan automáticamente)
         async function buscarUsuarios() {
             const searchInput = document.getElementById('searchInput');
             const resultsContainer = document.getElementById('searchResults');
@@ -1024,7 +1033,7 @@
             
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                usuarioActual = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email;
+                usuarioActual = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email.split('@')[0];
             }
 
             if (!usuarioActual) {
@@ -1062,7 +1071,7 @@
             
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                const nombreDiscord = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.preferred_username || session.user.email;
+                const nombreDiscord = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.preferred_username || session.user.email.split('@')[0];
                 navContainer.innerHTML = `
                     <button class="btn-outline" onclick="toggleModal(true, true)">Mi Perfil</button>
                     <span style="color: var(--purple-neon); font-weight: 600;">Hola, ${nombreDiscord}</span>
