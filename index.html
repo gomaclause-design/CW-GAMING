@@ -237,6 +237,14 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 6px;
+        }
+
+        .search-result-item:hover {
+            background: rgba(168, 85, 247, 0.15);
+            color: #fff;
         }
 
         .search-result-item img, .profile-avatar-square img {
@@ -428,6 +436,7 @@
             max-width: 420px;
             box-shadow: 0 0 30px var(--purple-glow);
             position: relative;
+            text-align: center;
         }
 
         .modal h3 {
@@ -440,6 +449,7 @@
 
         .input-group {
             margin-bottom: 12px;
+            text-align: left;
         }
 
         .input-group label {
@@ -559,7 +569,7 @@
 
         .profile-info {
             background: var(--bg-color);
-            padding: 12px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
             text-align: left;
@@ -567,9 +577,9 @@
         }
 
         .profile-info p {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .profile-info span {
@@ -693,7 +703,6 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Limpiar tokens duplicados en el hash de la URL de inmediato al cargar
         if (window.location.hash && window.location.hash.includes('access_token')) {
             window.history.replaceState(null, document.title, window.location.pathname);
         }
@@ -793,6 +802,47 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Nueva función para ver el perfil público de cualquier usuario encontrado
+        async function verPerfilPublico(username) {
+            const { data: usuarioBD, error } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .eq('username', username)
+                .maybeSingle();
+
+            if (error || !usuarioBD) {
+                alert("No se pudo cargar la información del usuario.");
+                return;
+            }
+
+            const modal = document.getElementById('loginModal');
+            const container = document.getElementById('authFormsContainer');
+
+            const avatar = usuarioBD.avatar_url || "";
+            const displayName = usuarioBD.username;
+            const bio = usuarioBD.bio || "Sin biografía disponible.";
+            const esDiscord = usuarioBD.discord_id && usuarioBD.discord_id !== 'web_user';
+
+            container.innerHTML = `
+                <div class="profile-card">
+                    <h3>PERFIL DE JUGADOR</h3>
+                    <div class="profile-avatar-square">
+                        ${avatar ? `<img src="${avatar}" alt="Avatar">` : `<div style="font-size:32px;color:#fff;">${displayName.charAt(0).toUpperCase()}</div>`}
+                    </div>
+                    <div class="profile-info">
+                        <p>Display Name: <span>${displayName}</span></p>
+                        <p>Gamertag / Usuario: <span>${usuarioBD.username}</span></p>
+                        <p>Plataforma: <span>${esDiscord ? 'Discord Verified' : 'CW Gaming Local'}</span></p>
+                        <p>Bio: <span>${bio}</span></p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-login" onclick="toggleModal(false)">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'flex';
         }
 
         function convertirImagenLocal(event) {
@@ -971,7 +1021,7 @@
                 resultsContainer.innerHTML = usuarios.map(u => {
                     const esDiscord = u.discord_id && u.discord_id !== 'web_user';
                     return `
-                        <div class="search-result-item">
+                        <div class="search-result-item" onclick="verPerfilPublico('${u.username}')">
                             ${u.avatar_url ? `<img src="${u.avatar_url}" alt="Avatar">` : `<div style="width:45px;height:45px;border-radius:8px;background:#8a2be2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">${u.username.charAt(0).toUpperCase()}</div>`}
                             <div>
                                 🎮 <span>${u.username}</span> ${esDiscord ? '<span style="color:#5865F2; font-size:11px; margin-left:5px;">(Discord)</span>' : ''}<br>
@@ -1019,7 +1069,6 @@
             }
         }
 
-        // Activación de Realtime en Supabase para el chat global
         function inicializarChatRealtime() {
             supabaseClient
                 .channel('public:mensajes')
@@ -1027,7 +1076,6 @@
                     const chatBox = document.getElementById('chatMessages');
                     if (!chatBox) return;
                     
-                    // Añadir el nuevo mensaje directamente al chat
                     chatBox.innerHTML += `
                         <div class="chat-msg">
                             <div class="author">${payload.new.username}</div>
