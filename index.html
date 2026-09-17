@@ -845,7 +845,6 @@
             });
         }
 
-        // FUNCIÓN CORREGIDA Y BLINDADA: Inserta o actualiza el usuario de Discord en la tabla de Supabase
         async function sincronizarUsuarioDiscord() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
@@ -855,7 +854,6 @@
             const discordAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
             const discordId = user.id;
 
-            // Revisar si ya existe el registro por ID de Discord o por nombre de usuario
             const { data: existente } = await supabaseClient
                 .from('usuarios')
                 .select('*')
@@ -863,7 +861,6 @@
                 .maybeSingle();
 
             if (!existente) {
-                // Si no existe, se inserta con los datos correspondientes de Discord
                 const { error } = await supabaseClient
                     .from('usuarios')
                     .insert([{
@@ -877,7 +874,6 @@
                     console.error("Error al registrar usuario de Discord automáticamente:", error.message);
                 }
             } else if (!existente.discord_id || existente.discord_id === 'web_user') {
-                // Si ya existía de forma local, actualizamos su discord_id y avatar
                 await supabaseClient
                     .from('usuarios')
                     .update({ discord_id: discordId, avatar_url: discordAvatar })
@@ -1023,6 +1019,26 @@
             }
         }
 
+        // Activación de Realtime en Supabase para el chat global
+        function inicializarChatRealtime() {
+            supabaseClient
+                .channel('public:mensajes')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes' }, payload => {
+                    const chatBox = document.getElementById('chatMessages');
+                    if (!chatBox) return;
+                    
+                    // Añadir el nuevo mensaje directamente al chat
+                    chatBox.innerHTML += `
+                        <div class="chat-msg">
+                            <div class="author">${payload.new.username}</div>
+                            <div class="text">${payload.new.mensaje}</div>
+                        </div>
+                    `;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                })
+                .subscribe();
+        }
+
         async function enviarMensajeChat() {
             const input = document.getElementById('chatInput');
             if (!input) return;
@@ -1045,25 +1061,13 @@
                 .insert([{ username: usuarioActual, mensaje: texto }]);
 
             if (error) {
-                const chatBox = document.getElementById('chatMessages');
-                if (chatBox) {
-                    chatBox.innerHTML += `
-                        <div class="chat-msg">
-                            <div class="author">${usuarioActual}</div>
-                            <div class="text">${texto}</div>
-                        </div>
-                    `;
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }
-            } else {
-                cargarMensajesChat();
+                alert("Error al enviar mensaje: " + error.message);
             }
 
             input.value = '';
         }
 
         async function verificarSesionLocal() {
-            // Sincronizar automáticamente el usuario de Discord a la base de datos al cargar
             await sincronizarUsuarioDiscord();
 
             const navContainer = document.getElementById('navAuthContainer');
@@ -1078,6 +1082,7 @@
                     <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
                 `;
                 cargarMensajesChat();
+                inicializarChatRealtime();
                 return;
             }
 
@@ -1090,6 +1095,7 @@
                 `;
             }
             cargarMensajesChat();
+            inicializarChatRealtime();
         }
 
         async function cerrarSesion() {
